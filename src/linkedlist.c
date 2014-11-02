@@ -12,7 +12,7 @@
 struct node {
 	int data;
 	struct node *next;
-}*head, *var, *trav;
+}*head, *var;
 
 /*Adds a new node as head, with specified value*/
 void add_beginning(int val) {
