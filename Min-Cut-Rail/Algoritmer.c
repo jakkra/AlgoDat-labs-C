@@ -160,9 +160,8 @@ int bfs(int source, int goal) {
 void parse() {
 	char working_directory[1024];
 	if (getcwd(working_directory, sizeof(working_directory)) != NULL) {
-		//fprintf(stdout, "Current working dir: %s\n", working_directory);
 	} else {
-		//perror("getcwd() error");
+		perror("getcwd() error");
 	}
 
 	static const char filename[] = "/rail.txt";
@@ -172,12 +171,11 @@ void parse() {
 	full_path[0] = '\0';
 	strcat(full_path, working_directory);
 	strcat(full_path, filename);
-	//printf("%s\n", full_path);
 
 	FILE *file = fopen(full_path, "r");
 	if (file != NULL) {
 
-		char line[128]; /* or other suitable maximum line size */
+		char line[128]; 
 
 		/*Skip until we see flag "DESTINATIONS"*/
 		while (fgets(line, sizeof line, file) != NULL
