@@ -2,9 +2,6 @@
  ============================================================================
  Name        : Algoritmer.c
  Author      : Jakob Krantz
- Version     :
- Copyright   : 
- Description : Hello World in C, Ansi-style
  ============================================================================
  */
 
@@ -34,9 +31,9 @@ int residualGraph[55][55];
 
 int main(int argc, char const *argv[]) {
 	struct timeval start, end;
-	gettimeofday(&start, 0);
 
 	parse();
+	gettimeofday(&start, 0);
 	//show_graph();
 	int max_flow = ford_fulceson(0, 54);
 	gettimeofday(&end, 0);
@@ -114,6 +111,7 @@ void bfsCut(int source, int goal) {
 			}
 		}
 	}
+	//CBB printing the min cut.
 	/*for (int i = 0; i < number_of_nodes; i++) {
 	 for (int j = 0; j < number_of_nodes; j++) {
 	 if (visited[i] && !visited[j] && (graph[i][j] > 0)) {
