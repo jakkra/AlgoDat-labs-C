@@ -19,7 +19,7 @@ typedef struct
 char *getcwd(char *buf, size_t size);
 void print_edge(char *city);
 void parse(Edge edges[]);
-void run_kruskal(Edge edges[], GPtrArray *result);
+void run_kruskal(Edge edges[], Edge *min_tree);
 char *subString (const char *input, int offset, int len, char *dest);
 void sort(Edge list[], int length);
 GHashTable *is_in_group(GPtrArray *groups, GString *city, int elements_in_groups);
@@ -31,43 +31,51 @@ GHashTable *is_in_group(GPtrArray *groups, GString *city, int elements_in_groups
 
 int main(int argc, char **argv)
 {
+    struct timeval start, end;
+    gettimeofday(&start, 0);
 
     Edge *edges = malloc(8130 * sizeof (Edge)); // 8257 - 128 = 8129 edges
     parse(edges);
-    sort(edges, 8128);
-    GPtrArray *min_tree = g_ptr_array_new();
-    run_kruskal(edges, min_tree);
-    
 
-    
-    
+    sort(edges, 8128);
+
+    /*for (int i = 0; i < 8130; ++i)
+    {
+        printf("%d: %s - %s \n",edges[i].weight, edges[i].city_a, edges[i].city_b );
+    }
+    */
+    Edge *min_tree = malloc(129 * sizeof (Edge)); // 128 cities
+    run_kruskal(edges, min_tree);
+        gettimeofday(&end, 0);
+
+    int weight = 0;
+    for (int i = 0; i < 129; ++i)
+    {
+        weight += min_tree[i].weight;
+        printf("%d: %s - %s \n", edges[i].weight, edges[i].city_a, edges[i].city_b );
+    }
+    printf("Total weight_ %d\n", weight);
+    long elapsed = (end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec
+                   - start.tv_usec;
+    printf("Time elapsed: %ld micro seconds ", elapsed);
+
+
+
     return 0;
 }
 
-gboolean compare_strings(gconstpointer a, gconstpointer b)
-{
-    gboolean t = TRUE;
-    gboolean f = FALSE;
-    if (strcmp(a, b) == 0)
-    {
-        puts("r T");
 
-        return t;
-    }
-    else
-    {
-        puts("r F");
-        return f;
-    }
-}
 gboolean remove_add(gpointer key, gpointer value, gpointer user_data)
 {
 
-    //TODO
+    GHashTable *set = (GHashTable *) user_data;
+    GString *k = (GString *) key;
+    GString *v = (GString *) value;
+    g_hash_table_add(user_data, key);
 
-    puts("removing");
-    puts(key);
-    puts(value);
+
+    //puts("removing");
+    //puts(k-> str);
 
     gboolean t = TRUE;
     return t;
@@ -76,9 +84,9 @@ gboolean remove_add(gpointer key, gpointer value, gpointer user_data)
 
 /*runs kruskal's algorithm on @param edges and stores
  a minimal spanning tree in @param min_tree*/
-void run_kruskal(Edge edges[], GPtrArray *result)
+void run_kruskal(Edge edges[], Edge *min_tree)
 {
-    int total_weight = 0;
+    int result_size = 0;
     int elements_in_groups = 0;
     GPtrArray *groups = g_ptr_array_new();
     for (int i = 0; i < 8128; i++)
@@ -86,28 +94,20 @@ void run_kruskal(Edge edges[], GPtrArray *result)
         GString *city_a = g_string_new(edges[i].city_a);
         GString *city_b = g_string_new(edges[i].city_b);
 
-        puts("----");
 
         // Check if city A and B are already in a group
         GHashTable *group_A = is_in_group(groups, city_a, elements_in_groups);
         GHashTable *group_B = is_in_group(groups, city_b, elements_in_groups);
 
 
-        if (group_A == NULL)
-        {
-            puts("Not found A");
-        }
-        if (group_B == NULL)
-        {
-            puts("Not found B");
-        }
+
 
         if (group_A == NULL && group_B == NULL)
         {
-            puts("Adding");
-            total_weight += edges[i].weight;
-            //g_ptr_array_add(result,(gpointer) edges[i]);
-            GHashTable *new_group = g_hash_table_new(g_str_hash, g_string_equal);
+            //puts("Adding");
+            min_tree[result_size] = edges[i];
+            result_size ++;
+            GHashTable *new_group = g_hash_table_new(g_string_hash, g_string_equal);
             g_hash_table_add(new_group, city_a);
             g_hash_table_add(new_group, city_b);
 
@@ -116,16 +116,15 @@ void run_kruskal(Edge edges[], GPtrArray *result)
         }
         else if (group_A == NULL && group_B != NULL)
         {
-            // g_ptr_array_add(result, (gpointer) edges[i]);
-            total_weight += edges[i].weight;
+            min_tree[result_size] = edges[i];
+            result_size ++;
 
             g_hash_table_add(group_B, city_a);
         }
         else if (group_A != NULL && group_B == NULL)
         {
-            total_weight += edges[i].weight;
-
-            // g_ptr_array_add(result, (gpointer) edges[i]);
+            min_tree[result_size] = edges[i];
+            result_size ++;
             g_hash_table_add(group_A, city_b);
         }
         else if (group_A != NULL && group_B != NULL)
@@ -134,22 +133,30 @@ void run_kruskal(Edge edges[], GPtrArray *result)
             {
                 // same =>
                 // they should be added to the same group
-                puts("Same group");
+                //puts("NOT SAME GROUP");
                 g_hash_table_foreach_remove (group_B, remove_add, group_A);
+                gboolean removed = g_ptr_array_remove(groups, group_B);
+                elements_in_groups --;
 
+                /*if (removed)
+                {
+                    puts("Group B removed from groups list");
+                }
+                */
                 //groupA.addAll(groupB);
                 //groups.remove(groupB);
                 // kruskalResult.add(e);
+                min_tree[result_size] = edges[i];
+                result_size ++;
             }
             else
             {
-                // if both are the same, are we done????
+                //puts("BOTH THE SAME");
             }
         }
         //group_A
 
     }
-    printf("Total weight = %d\n", total_weight);
 
 
 
@@ -163,22 +170,22 @@ void run_kruskal(Edge edges[], GPtrArray *result)
 
 GHashTable *is_in_group(GPtrArray *groups, GString *city, int elements)
 {
-    puts("is_in_group called");
+    //puts("is_in_group called");
     GHashTable *temp_set = NULL;
 
     for (int i = 0; i < elements; i++)
     {
 
         temp_set = g_ptr_array_index(groups, i);
-        printf("Elements in set: %d\n", g_hash_table_size(temp_set));
+        //printf("Elements in set: %d\n", g_hash_table_size(temp_set));
         if (g_hash_table_contains(temp_set,  city) == TRUE)
         {
-            printf("Found: %s\n", city->str );
+            //printf("Found: %s\n", city->str );
             return temp_set;
 
         }
     }
-    printf("City: %s not found\n", city-> str);
+    //printf("City: %s not found\n", city-> str);
     return NULL;
 }
 
