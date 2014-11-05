@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     */
     Edge *min_tree = malloc(129 * sizeof (Edge)); // 128 cities
     run_kruskal(edges, min_tree);
-        gettimeofday(&end, 0);
+    gettimeofday(&end, 0);
 
     int weight = 0;
     for (int i = 0; i < 129; ++i)
@@ -129,6 +129,9 @@ void run_kruskal(Edge edges[], Edge *min_tree)
         }
         else if (group_A != NULL && group_B != NULL)
         {
+
+
+            //Might not work !=
             if (group_A != group_B)   // Both are in groups, and not the
             {
                 // same =>
@@ -137,7 +140,7 @@ void run_kruskal(Edge edges[], Edge *min_tree)
                 g_hash_table_foreach_remove (group_B, remove_add, group_A);
                 gboolean removed = g_ptr_array_remove(groups, group_B);
                 elements_in_groups --;
-
+                //puts("Not same");
                 /*if (removed)
                 {
                     puts("Group B removed from groups list");
@@ -148,10 +151,29 @@ void run_kruskal(Edge edges[], Edge *min_tree)
                 // kruskalResult.add(e);
                 min_tree[result_size] = edges[i];
                 result_size ++;
+                if (g_hash_table_contains(group_A,  city_a) == g_hash_table_contains(group_B,  city_a))
+                {
+                    puts("Not samfdsgfhdshfghgfhfgdhfdge");
+                }
+                if (g_hash_table_contains(group_B,  city_b) == g_hash_table_contains(group_B,  city_b))
+                {
+                    puts("Not samgfhfdghfdfgdsghajndgjhsdfijgknlkfhe");
+                    puts("----");
+                }
             }
             else
             {
+               if (g_hash_table_contains(group_A,  city_a) == g_hash_table_contains(group_A,  city_a))
+                {
+                    puts("Yes same");
+                }
+                if (g_hash_table_contains(group_B,  city_b) == g_hash_table_contains(group_A,  city_b))
+                {
+                    puts("Yes same");
+                    puts("----");
+                }
                 //puts("BOTH THE SAME");
+                
             }
         }
         //group_A
